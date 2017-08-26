@@ -1,16 +1,49 @@
 import React from 'react';
 import NavBar from './NavBar';
+import ModalMessage from './ModalMessage';
+import ModalTask from './ModalTask';
 
 class Navigation extends React.Component {
   /* описываем первоначальное состояние */
   state = {
     fetchInProgress: false,
     navElements: [],
+    message: {},
+    task: {},
     fetchError: false,
     fetchErrorText: ''
   }
 
   componentDidMount () {
+    this.getInfo();
+  }
+
+  /* производит выход пользователя из системы */
+  systemLogout = () => {
+    window.location.replace('/site/logout');
+  }
+
+  /* 
+   * открывает модальное окно.
+   * сначала выводит сообщения, 
+   * потом задачи.
+   */
+  modalShow = () => {
+    if (!$.isEmptyObject(this.state.message)) {
+      $('.message-modal').modal('show');
+    } else {
+      if (!$.isEmptyObject(this.state.task)) {
+        $('.task-modal').modal('show');
+      }
+    }          
+  }
+
+  /* закрывает модальное окно */
+  modalHide = (type) => {
+    $(type).modal('hide');
+  }
+
+  getInfo = () => {
     this.setState({ fetchInProgress: true });
     /* запрашиваем список элементов навигации */
     fetch('/site/nav', 
@@ -33,14 +66,18 @@ class Navigation extends React.Component {
     })
     .then(json => {
         this.setState({
-          /* проверяем наличие navElements в ответе и помещаем в state */
+          /* проверяем наличие данных в ответе и помещаем в state */
           navElements: json.navElements ? json.navElements : [],
+          message: json.message ? json.message : {},
+          task: json.task ? json.task : {},
           /* отключаем состояние загрузки */
           fetchInProgress: false,
           /* на всякий случай сбрасываем ошибки */
           fetchError: false,
           fetchErrorText: '',
         });
+        /* открываем модальное окно сообщения или задачи с секундной задержкой */
+        setTimeout(this.modalShow(), 1000);
     })
     .catch(err => {
       /* если ошибка, выставляем флаг и сохраняем текст ошибки */
@@ -50,10 +87,6 @@ class Navigation extends React.Component {
         fetchInProgress: false
       });
     });
-  }
-
-  systemLogout = () => {
-    window.location.replace('/site/logout');
   }
 
   render () {
@@ -66,7 +99,11 @@ class Navigation extends React.Component {
           this.state.fetchError ?
             <div className="alert alert-danger navigation-loading-alert"><b>Ошибка.</b> Не удалось загрузить элементы панели...</div>
             :
-            <NavBar navElements={ this.state.navElements } logout={ this.systemLogout } />
+            <div>
+              <NavBar navElements={ this.state.navElements } logout={ this.systemLogout } />
+              <ModalMessage data={ this.state.message } hide={ this.modalHide } info={ this.getInfo } />
+              <ModalTask data={ this.state.task } hide={ this.modalHide } info={ this.getInfo } />
+            </div>
         }
       </div>
     );
