@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import ListItems from './ListItem';
+import Timer from './Timer';
 
 class NavBar extends React.Component {
   constructor(props) {
@@ -22,6 +23,7 @@ class NavBar extends React.Component {
           </div>
           <div id="top-nav-collapse" className="collapse navbar-collapse">
             <ul id="nav-links" className="navbar-nav nav">
+            <Timer logout={ this.props.logout }/>
             {
               this.props.navElements.length ?
                 this.props.navElements.map(item => 
@@ -38,7 +40,8 @@ class NavBar extends React.Component {
 
 /* проверяем props */
 NavBar.propTypes = {
-  navElements: PropTypes.array.isRequired
+  navElements: PropTypes.array.isRequired,
+  logout: PropTypes.func.isRequired
 }
 
 export default NavBar;

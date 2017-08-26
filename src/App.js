@@ -52,6 +52,10 @@ class Navigation extends React.Component {
     });
   }
 
+  systemLogout = () => {
+    window.location.replace('/site/logout');
+  }
+
   render () {
     return (
       <div className="navigation-block">
@@ -62,7 +66,7 @@ class Navigation extends React.Component {
           this.state.fetchError ?
             <div className="alert alert-danger navigation-loading-alert"><b>Ошибка.</b> Не удалось загрузить элементы панели...</div>
             :
-            <NavBar navElements={ this.state.navElements } />
+            <NavBar navElements={ this.state.navElements } logout={ this.systemLogout } />
         }
       </div>
     );
