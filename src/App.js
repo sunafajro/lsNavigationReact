@@ -1,16 +1,11 @@
 import React from 'react';
+import NavBar from './NavBar';
 
 class Navigation extends React.Component {
   /* описываем первоначальное состояние */
   state = {
     fetchInProgress: false,
     navElements: [],
-    cnt: {
-      messages: 0,
-      tasks: 0,
-      expenses: 0,
-      sales: 0
-    },
     fetchError: false,
     fetchErrorText: ''
   }
@@ -67,39 +62,8 @@ class Navigation extends React.Component {
           this.state.fetchError ?
             <div className="alert alert-danger navigation-loading-alert"><b>Ошибка.</b> Не удалось загрузить элементы панели...</div>
             :
-            <nav id="top-nav" className="navbar navbar-default navbar-fixed-top">
-              <div className="container-fluid">
-                  <div className="navbar-header">
-                      <button
-                        type="button"
-                        data-toggle="collapse"
-                        data-target="#top-nav-collapse"
-                        className="navbar-toggle">
-                          <span className="sr-only">Toggle navigation</span> <span className="icon-bar"></span> <span className="icon-bar"></span> <span className="icon-bar"></span>
-                    </button>
-                  </div>
-                  <div id="top-nav-collapse" className="collapse navbar-collapse">
-                      <ul id="nav-links" className="navbar-nav nav">
-                        { 
-                          this.state.navElements ?
-                          this.state.navElements.map(item => {
-                            <li key={ item.id }>
-                              <a href={ item.url }>
-                                <span aria-hidden="true" className={ item.classes }></span>
-                                { 
-                                  item.hasBadge ? 
-                                  <span className="badge">{ this.state.cnt[item.id] }</span>
-                                  : ''
-                                }
-                              </a>
-                            </li>
-                          }) : ''
-                        }
-                      </ul>
-                  </div>
-              </div>
-            </nav>
-      }
+            <NavBar navElements={ this.state.navElements } />
+        }
       </div>
     );
   }
