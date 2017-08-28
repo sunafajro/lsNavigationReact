@@ -23,7 +23,6 @@
     "babel-preset-stage-2": "^6.24.1",
     "css-loader": "^0.28.4",
     "style-loader": "^0.18.2",
-    "webpack": "^3.4.1",
-    "webpack-bundle-analyzer": "^2.8.3"
+    "webpack": "^3.4.1"
   }
 }
