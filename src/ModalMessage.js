@@ -2,12 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 class ModalMessage extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      fetchError: false,
-      fetchErrorText: ''
-    }
+  state = {
+    fetchError: false,
+    fetchErrorText: ''
   }
 
   setViewed = (id) => {
@@ -38,7 +35,8 @@ class ModalMessage extends React.Component {
           fetchErrorText: ''
         });
         this.props.hide('.message-modal');
-        this.props.info();
+        this.props.update('message');
+        this.props.info('counters');
       } else {
         throw Error('Произошла ошибка');
       }
@@ -90,7 +88,8 @@ class ModalMessage extends React.Component {
 ModalMessage.propTypes = {
     data: PropTypes.object.isRequired,
     hide: PropTypes.func.isRequired,
-    info: PropTypes.func.isRequired
+    info: PropTypes.func.isRequired,
+    update: PropTypes.func.isRequired
   }
 
 export default ModalMessage;

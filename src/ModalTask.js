@@ -2,12 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 class ModalTask extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-        fetchError: false,
-        fetchErrorText: ''
-      }
+  state = {
+    fetchError: false,
+    fetchErrorText: ''
   }
 
   setViewed = (id) => {
@@ -26,16 +23,23 @@ class ModalTask extends React.Component {
     .then(response => {
       if (!response.ok) {
         throw Error(response.statusText);
+        return response;
+      } else {
+        return response.json();
       }
-      return response;
     })
     .then(json => {
-      this.setState({
-        fetchError: false,
-        fetchErrorText: ''
-      });
-      this.props.hide('.task-modal');
-      this.props.info();
+      if (json.result) {
+        this.setState({
+          fetchError: false,
+          fetchErrorText: ''
+        });
+        this.props.hide('.task-modal');
+        this.props.update('task');
+        this.props.info('counters');
+      } else {
+        throw Error('Произошла ошибка');
+      }
     })
     .catch(err => {
       /* если ошибка, выставляем флаг и сохраняем текст ошибки */
@@ -78,9 +82,10 @@ class ModalTask extends React.Component {
 
 /* проверяем props */
 ModalTask.propTypes = {
-    data: PropTypes.object.isRequired,
-    hide: PropTypes.func.isRequired,
-    info: PropTypes.func.isRequired
-  }
+  data: PropTypes.object.isRequired,
+  hide: PropTypes.func.isRequired,
+  info: PropTypes.func.isRequired,
+  update: PropTypes.func.isRequired
+}
 
 export default ModalTask;
