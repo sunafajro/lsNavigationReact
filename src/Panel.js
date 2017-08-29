@@ -4,9 +4,6 @@ import ListItems from './ListItem';
 import Timer from './Timer';
 
 class NavBar extends React.Component {
-  constructor(props) {
-    super(props);
-  }
 
   render () {
     return (
@@ -25,10 +22,15 @@ class NavBar extends React.Component {
             <ul id="nav-links" className="navbar-nav nav">
             <Timer logout={ this.props.logout }/>
             {
-              this.props.navElements.length ?
-                this.props.navElements.map(item => 
-                  <ListItems key={ item.id } data={ item } />
-                ) : ''
+              this.props.isFetching ?
+                <li>
+                  <span className="navbar-text">Загружаем панель навигации...</span>
+                </li>
+                :
+                this.props.navElements.length ?
+                  this.props.navElements.map(item => 
+                    <ListItems key={ item.id } data={ item } />
+                  ) : ''
             }
             </ul>
           </div>
@@ -41,7 +43,8 @@ class NavBar extends React.Component {
 /* проверяем props */
 NavBar.propTypes = {
   navElements: PropTypes.array.isRequired,
-  logout: PropTypes.func.isRequired
+  logout: PropTypes.func.isRequired,
+  isFetching: PropTypes.bool.isRequired
 }
 
 export default NavBar;

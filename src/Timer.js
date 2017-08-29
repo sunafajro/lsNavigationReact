@@ -9,7 +9,6 @@ class Timer extends React.Component {
       formatted_time: '15:00'
     }
   }
-
   /* метод задает начальный 15 минутный интервал */
   createTimer = () => {
     let d = new Date();
@@ -60,7 +59,7 @@ class Timer extends React.Component {
   render () {
     return (
       <li
-        style={{ paddingTop: '15px', paddingBottom: '15px' }}
+        style={{ padding: '13px 10px' }}
       >
         <span
           className="label label-default"

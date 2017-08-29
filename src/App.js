@@ -1,5 +1,5 @@
 import React from 'react';
-import NavBar from './NavBar';
+import Panel from './Panel';
 import ModalMessage from './ModalMessage';
 import ModalTask from './ModalTask';
 import ModalApproveSale from './ModalApproveSale'; 
@@ -58,7 +58,7 @@ class Navigation extends React.Component {
   /* запрашивает данные для панели навигации */
   getInfo = (type = 'all') => {
     /* если нужны только счетчики */
-    if (type === 'counters') {
+    if (type !== 'counters') {
       this.setState({ fetchInProgress: true });
     }
     const body = JSON.stringify(type);
@@ -121,14 +121,14 @@ class Navigation extends React.Component {
     return (
       <div className="navigation-block">
         {
-          this.state.fetchInProgress ?
-            <div className="alert alert-warning navigation-loading-alert"><b>Подождите.</b> Загружаем элементы панели...</div>
-          :
           this.state.fetchError ?
             <div className="alert alert-danger navigation-loading-alert"><b>Ошибка.</b> Не удалось загрузить элементы панели.</div>
             :
             <div>
-              <NavBar navElements={ this.state.navElements } logout={ this.systemLogout } />
+              <Panel
+                navElements={ this.state.navElements }
+                logout={ this.systemLogout }
+                isFetching={ this.state.fetchInProgress } />
               <ModalMessage data={ this.state.message } hide={ this.modalHide } info={ this.getInfo } update={ this.updateModalData } />
               <ModalTask data={ this.state.task } hide={ this.modalHide } info={ this.getInfo } update={ this.updateModalData } />
               <ModalApproveSale data={ this.state.sale } hide={ this.modalHide } info={ this.getInfo } update={ this.updateModalData } />
