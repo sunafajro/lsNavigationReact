@@ -1,10 +1,25 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import {
+  Modal,
+  ModalHeader,
+  ModalTitle,
+  ModalClose,
+  ModalBody,
+  ModalFooter
+} from 'react-modal-bootstrap';
 
 class ModalMessage extends React.Component {
   state = {
     fetchError: false,
     fetchErrorText: ''
+  }
+
+  clearErrors = () => {
+    this.setState({
+      fetchError: false,
+      fetchErrorText: ''
+    });
   }
 
   setViewed = (id) => {
@@ -30,11 +45,7 @@ class ModalMessage extends React.Component {
     })
     .then(json => {
       if (json.result) {
-        this.setState({
-          fetchError: false,
-          fetchErrorText: ''
-        });
-        this.props.hide('.message-modal');
+        this.props.hide('openMessage')
         this.props.update('message');
         this.props.info('counters');
       } else {
@@ -47,39 +58,36 @@ class ModalMessage extends React.Component {
         fetchError: true,
         fetchErrorText: err
       });
+      setTimeout(() => this.clearErrors(), 3000);
     });
   }
 
   render () {
     return (
-      <div className="modal fade message-modal" id="message-modal" tabIndex="-1" role="dialog" aria-labelledby="message-modal-label">
-        <div className="modal-dialog" role="document">
-          <div className="modal-content">
-              <div className="modal-header">
-                  <button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                  <h4 className="modal-title" id="message-modal-label">{ this.props.data.title }</h4>
-              </div>
-              <div className="modal-body">
-                <p><strong>От кого:</strong> <span className="text-primary">{ this.props.data.sender }</span></p>
-                <p><strong>Текст:</strong></p> <div dangerouslySetInnerHTML={{ __html: this.props.data.body }}></div>
-                {
-                  this.props.data.image ?
-                  <p><strong>Файл:</strong><br />
-                    <img src={ this.props.data.image } alt="image" width="200px" />
-                  </p> : ''
-                }
-                {
-                  this.state.fetchError ? 
-                    <div className="alert alert-danger"><strong>Ошибка!</strong> Не удалось подтвердить прочтение.</div>
-                    : ''
-                }
-              </div>
-            <div className='modal-footer'>
-              <button className="btn btn-primary" onClick={ () => this.setViewed(this.props.data.rid) }>Я внимательно прочитал!</button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <Modal isOpen={ this.props.open } onRequestHide={ () => this.props.hide('openMessage') }>
+        <ModalHeader>
+          <ModalClose onClick={ () => this.props.hide('openMessage') }/>
+          <ModalTitle>{ this.props.data.title }</ModalTitle>
+        </ModalHeader>
+        <ModalBody>
+          <p><strong>От кого:</strong> <span className="text-primary">{ this.props.data.sender }</span></p>
+          <p><strong>Текст:</strong></p> <div dangerouslySetInnerHTML={{ __html: this.props.data.body }}></div>
+          {
+            this.props.data.image ?
+            <p><strong>Файл:</strong><br />
+              <img src={ this.props.data.image } alt="image" width="200px" />
+            </p> : ''
+          }
+          {
+            this.state.fetchError ? 
+              <div className="alert alert-danger"><strong>Ошибка!</strong> Не удалось подтвердить прочтение.</div>
+              : ''
+          }
+        </ModalBody>
+        <ModalFooter>
+          <button className="btn btn-primary" onClick={ () => this.setViewed(this.props.data.rid) }>Я внимательно прочитал!</button>
+        </ModalFooter>
+      </Modal>
     );
   }
 }
@@ -89,7 +97,8 @@ ModalMessage.propTypes = {
     data: PropTypes.object.isRequired,
     hide: PropTypes.func.isRequired,
     info: PropTypes.func.isRequired,
-    update: PropTypes.func.isRequired
+    update: PropTypes.func.isRequired,
+    open: PropTypes.bool.isRequired
   }
 
 export default ModalMessage;

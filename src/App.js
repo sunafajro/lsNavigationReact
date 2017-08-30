@@ -9,8 +9,11 @@ class Navigation extends React.Component {
   state = {
     fetchInProgress: false,
     navElements: [],
+    openMessage: false,
     message: {},
+    openTask: false,
     task: {},
+    openSale: false,
     sale: {},
     fetchError: false,
     fetchErrorText: ''
@@ -31,15 +34,17 @@ class Navigation extends React.Component {
    * потом задачи.
    */
   modalShow = () => {
-    /* проверяем и последовательно открываем окна */
-    if (!$.isEmptyObject(this.state.message)) {
-      $('.message-modal').modal('show');
-    } else {
-      if (!$.isEmptyObject(this.state.task)) {
-        $('.task-modal').modal('show');  
+    if (this.state.openMesage !== true || this.state.openTask !== true || this.state.openSale !== true) {
+      /* проверяем и последовательно открываем окна */
+      if (!$.isEmptyObject(this.state.message)) {
+        this.setState({ openMessage: true });
       } else {
-        if (!$.isEmptyObject(this.state.sale)) {
-          $('.sale-modal').modal('show');
+        if (!$.isEmptyObject(this.state.task)) {
+          this.setState({ openTask: true });  
+        } else {
+          if (!$.isEmptyObject(this.state.sale)) {
+            this.setState({ openSale: true });
+          }
         }
       }
     }          
@@ -47,7 +52,7 @@ class Navigation extends React.Component {
 
   /* закрывает модальное окно */
   modalHide = (type) => {
-    $(type).modal('hide');
+    this.setState({ [type]: false });
   }
 
   /* сбрасывает сообщение, задачу или скидку */
@@ -105,7 +110,7 @@ class Navigation extends React.Component {
         });
         /* открываем модальное окно сообщения или задачи с секундной задержкой */
         setTimeout(() => this.modalShow(), 1000);
-        setTimeout(() => this.getInfo('counters'), 60000);
+        setTimeout(() => this.getInfo('counters'), 30000);
     })
     .catch(err => {
       /* если ошибка, выставляем флаг и сохраняем текст ошибки */
@@ -129,9 +134,27 @@ class Navigation extends React.Component {
                 navElements={ this.state.navElements }
                 logout={ this.systemLogout }
                 isFetching={ this.state.fetchInProgress } />
-              <ModalMessage data={ this.state.message } hide={ this.modalHide } info={ this.getInfo } update={ this.updateModalData } />
-              <ModalTask data={ this.state.task } hide={ this.modalHide } info={ this.getInfo } update={ this.updateModalData } />
-              <ModalApproveSale data={ this.state.sale } hide={ this.modalHide } info={ this.getInfo } update={ this.updateModalData } />
+              <ModalMessage
+                data={ this.state.message }
+                hide={ this.modalHide }
+                info={ this.getInfo }
+                update={ this.updateModalData }
+                open={ this.state.openMessage }
+              />
+              <ModalTask
+                data={ this.state.task }
+                hide={ this.modalHide }
+                info={ this.getInfo }
+                update={ this.updateModalData }
+                open={ this.state.openTask }
+              />
+              <ModalApproveSale
+                data={ this.state.sale }
+                hide={ this.modalHide }
+                info={ this.getInfo }
+                update={ this.updateModalData }
+                open={ this.state.openSale }
+              />
             </div>
         }
       </div>
