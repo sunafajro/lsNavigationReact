@@ -110,7 +110,7 @@ class Navigation extends React.Component {
         });
         /* открываем модальное окно сообщения или задачи с секундной задержкой */
         setTimeout(() => this.modalShow(), 1000);
-        setTimeout(() => this.getInfo('counters'), 30000);
+        setTimeout(() => this.getInfo('counters'), 180000);
     })
     .catch(err => {
       /* если ошибка, выставляем флаг и сохраняем текст ошибки */
