@@ -2,7 +2,8 @@ import React from 'react';
 import Panel from './Panel';
 import ModalMessage from './ModalMessage';
 import ModalTask from './ModalTask';
-import ModalApproveSale from './ModalApproveSale'; 
+import ModalApproveSale from './ModalApproveSale';
+import { getCsrfToken } from './Utils.js';
 
 class Navigation extends React.Component {
   /* описываем первоначальное состояние */
@@ -19,7 +20,7 @@ class Navigation extends React.Component {
     fetchErrorText: ''
   }
 
-  componentDidMount () {
+  componentDidMount() {
     this.getInfo();
   }
 
@@ -40,14 +41,14 @@ class Navigation extends React.Component {
         this.setState({ openMessage: true });
       } else {
         if (!$.isEmptyObject(this.state.task)) {
-          this.setState({ openTask: true });  
+          this.setState({ openTask: true });
         } else {
           if (!$.isEmptyObject(this.state.sale)) {
             this.setState({ openSale: true });
           }
         }
       }
-    }          
+    }
   }
 
   /* закрывает модальное окно */
@@ -57,7 +58,7 @@ class Navigation extends React.Component {
 
   /* сбрасывает сообщение, задачу или скидку */
   updateModalData = (type) => {
-    this.setState({[type]: {}});
+    this.setState({ [type]: {} });
   }
 
   /* запрашивает данные для панели навигации */
@@ -66,63 +67,78 @@ class Navigation extends React.Component {
     if (type !== 'counters') {
       this.setState({ fetchInProgress: true });
     }
-    const body = JSON.stringify(type);
-    /* запрашиваем список элементов навигации */
-    fetch('/site/nav', 
-    {
-      method: 'POST',
-      accept: 'application/json',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body
-    })
-    .then(response => {
-      /* проверяем на наличии 200 кода в ответе */
-      if (!response.ok) {
-        throw Error(response.statusText);
-        return response;
-      } else {
-        return response.json();
-      }
-    })
-    .then(json => {
-        /* если нужны только счетчики */
-        if (type === 'counters' && json.cnts) {
-          let elements = { ...this.state.navElements };
-          elements.messages.cnt = json.cnts.messages;
-          elements.tasks.cnt = json.cnts.tasks;
-          elements.sales.cnt = json.cnts.sales;
-          json.navElements = { ...elements };
-        }
+    getCsrfToken()
+      .then(csrf => {
+        csrf.type = type;
+        const body = JSON.stringify(csrf);
+        /* запрашиваем список элементов навигации */
+        fetch('/site/nav',
+          {
+            method: 'POST',
+            accept: 'application/json',
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body
+          })
+          .then(response => {
+            /* проверяем на наличии 200 кода в ответе */
+            if (!response.ok) {
+              throw Error(response.statusText);
+            } else {
+              return response.json();
+            }
+          })
+          .then(json => {
+            /* если нужны только счетчики */
+            if (type === 'counters' && json.cnts) {
+              json.navElements = this.state.navElements.map(item => {
+                switch (item.id) {
+                  case "messages": item.cnt = json.cnts.messages; break;
+                  case "tasks": item.cnt = json.cnts.tasks; break;
+                  case "sales": item.cnt = json.cnts.sales; break;
+                  default:
+                }
+                return item;
+              });
+            }
+            this.setState({
+              /* проверяем наличие данных в ответе и помещаем в state */
+              navElements: json.navElements ? json.navElements : this.state.navElements,
+              message: json.message ? json.message : this.state.message,
+              task: json.task ? json.task : this.state.task,
+              sale: json.sale ? json.sale : this.state.sale,
+              /* отключаем состояние загрузки */
+              fetchInProgress: false,
+              /* на всякий случай сбрасываем ошибки */
+              fetchError: false,
+              fetchErrorText: ''
+            });
+            /* открываем модальное окно сообщения или задачи с секундной задержкой */
+            setTimeout(() => this.modalShow(), 1000);
+            setTimeout(() => this.getInfo('counters'), 180000);
+          })
+          .catch(err => {
+            /* если ошибка, выставляем флаг и сохраняем текст ошибки */
+            this.setState({
+              fetchError: true,
+              fetchErrorText: err,
+              fetchInProgress: false
+            });
+          });
+      })
+      .catch(error => {
+        /* если ошибка, выставляем флаг и сохраняем текст ошибки */
         this.setState({
-          /* проверяем наличие данных в ответе и помещаем в state */
-          navElements: json.navElements ? json.navElements : this.state.navElements,
-          message: json.message ? json.message : this.state.message,
-          task: json.task ? json.task : this.state.task,
-          sale: json.sale ? json.sale : this.state.sale,
-          /* отключаем состояние загрузки */
-          fetchInProgress: false,
-          /* на всякий случай сбрасываем ошибки */
-          fetchError: false,
-          fetchErrorText: ''
+          fetchError: true,
+          fetchErrorText: err,
+          fetchInProgress: false
         });
-        /* открываем модальное окно сообщения или задачи с секундной задержкой */
-        setTimeout(() => this.modalShow(), 1000);
-        setTimeout(() => this.getInfo('counters'), 180000);
-    })
-    .catch(err => {
-      /* если ошибка, выставляем флаг и сохраняем текст ошибки */
-      this.setState({
-        fetchError: true,
-        fetchErrorText: err,
-        fetchInProgress: false
       });
-    });
   }
 
-  render () {
+  render() {
     return (
       <div className="navigation-block">
         {
@@ -131,29 +147,29 @@ class Navigation extends React.Component {
             :
             <div>
               <Panel
-                navElements={ this.state.navElements }
-                logout={ this.systemLogout }
-                isFetching={ this.state.fetchInProgress } />
+                navElements={this.state.navElements}
+                logout={this.systemLogout}
+                isFetching={this.state.fetchInProgress} />
               <ModalMessage
-                data={ this.state.message }
-                hide={ this.modalHide }
-                info={ this.getInfo }
-                update={ this.updateModalData }
-                open={ this.state.openMessage }
+                data={this.state.message}
+                hide={this.modalHide}
+                info={this.getInfo}
+                update={this.updateModalData}
+                open={this.state.openMessage}
               />
               <ModalTask
-                data={ this.state.task }
-                hide={ this.modalHide }
-                info={ this.getInfo }
-                update={ this.updateModalData }
-                open={ this.state.openTask }
+                data={this.state.task}
+                hide={this.modalHide}
+                info={this.getInfo}
+                update={this.updateModalData}
+                open={this.state.openTask}
               />
               <ModalApproveSale
-                data={ this.state.sale }
-                hide={ this.modalHide }
-                info={ this.getInfo }
-                update={ this.updateModalData }
-                open={ this.state.openSale }
+                data={this.state.sale}
+                hide={this.modalHide}
+                info={this.getInfo}
+                update={this.updateModalData}
+                open={this.state.openSale}
               />
             </div>
         }
